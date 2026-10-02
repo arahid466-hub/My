@@ -23,7 +23,7 @@ done
 
 MODEL="${OLLAMA_MODEL:-llama3.2}"
 
-if ! ollama list | awk 'NR>1 {print $1}' | grep -qx "$MODEL"; then
+if ! ollama list | awk 'NR>1 {print $1}' | grep -Eq "^${MODEL}(:|$)"; then
     echo "=== Downloading model: $MODEL ==="
     ollama pull "$MODEL"
 fi
