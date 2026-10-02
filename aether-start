@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ROOT="${AETHER_DATA_DIR:-$HOME/.aether/data}"
+PORT="${PORT:-8000}"
+LOGDIR="$ROOT/logs"
+mkdir -p "$ROOT"/{models,uploads,generated/{images,audio,videos},jobs,cache,logs,projects}
+command -v python3 >/dev/null || { echo 'ERROR: Python 3 required'; exit 1; }
+if [ ! -d .venv ]; then python3 -m venv .venv; fi
+. .venv/bin/activate
+python -m pip install --disable-pip-version-check -q -r requirements.txt
+python -m py_compile server/main.py engine/core.py workers/worker.py scripts/bootstrap.py
+AETHER_DATA_DIR="$ROOT" PYTHONPATH=. python scripts/bootstrap.py > "$LOGDIR/bootstrap-report.json"
+if [ -n "${AETHER_WORKER_TOKEN:-}" ] && [ "${AETHER_WORKER_MODE:-}" = "local" ]; then
+  nohup uvicorn workers.worker:app --host 0.0.0.0 --port "${WORKER_PORT:-9000}" >>"$LOGDIR/worker.log" 2>&1 & echo $! >"$ROOT/worker.pid"
+fi
+nohup uvicorn server.main:app --host 0.0.0.0 --port "$PORT" >>"$LOGDIR/server.log" 2>&1 & echo $! >"$ROOT/server.pid"
+sleep 2
+if curl -fsS "http://127.0.0.1:$PORT/api/health" >/dev/null; then
+  AETHER_DATA_DIR="$ROOT" python - <<'PY'
+import json, os
+from pathlib import Path
+p=Path(os.environ['AETHER_DATA_DIR'])/'deployment-report.json'
+if p.exists():
+ d=json.loads(p.read_text()); d['api']={'status':'READY'}
+ d['final_status']='READY' if not d.get('errors') else 'PARTIAL'
+ p.write_text(json.dumps(d,indent=2))
+ print('AETHER '+d['final_status'])
+PY
+  echo "AETHER API READY: http://127.0.0.1:$PORT"
+  echo "AETHER REPORT: http://127.0.0.1:$PORT/api/deployment-report"
+  cat "$LOGDIR/bootstrap-report.json"
+else
+  echo "ERROR: server failed to start; see $LOGDIR/server.log"; exit 1
+fi

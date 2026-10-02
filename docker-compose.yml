@@ -1,0 +1,16 @@
+services:
+  aether:
+    build: .
+    ports: ["8000:8000"]
+    environment: [AETHER_DATA_DIR=/data/aether, OLLAMA_URL=http://ollama:11434]
+    volumes: [aether-data:/data/aether]
+    depends_on: [ollama]
+  ollama:
+    image: ollama/ollama:latest
+    volumes: [ollama-data:/root/.ollama]
+  gpu-worker:
+    build: .
+    command: uvicorn workers.worker:app --host 0.0.0.0 --port 9000
+    profiles: [gpu]
+    environment: [AETHER_WORKER_TOKEN=change-me]
+volumes: {aether-data: {}, ollama-data: {}}

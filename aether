@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+case "${1:-}" in
+ start) exec uvicorn server.main:app --host 0.0.0.0 --port "${PORT:-8000}" ;;
+ status) curl -fsS "http://127.0.0.1:${PORT:-8000}/api/health" ;;
+ stop) pkill -f 'uvicorn server.main:app' || true ;;
+ *) echo 'Usage: ./aether {start|status|stop}'; exit 2;;
+esac

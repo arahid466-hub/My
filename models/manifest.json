@@ -1,0 +1,10 @@
+{
+  "schema": "aether.models.v1",
+  "models": [
+    {"id":"llama3.2:3b","name":"Llama 3.2 3B","runtime":"ollama","capabilities":["chat","coding"],"min_ram_gb":4,"min_vram_gb":0,"quality_rank":1,"license":"Llama 3.2 Community License","install":"ollama pull llama3.2"},
+    {"id":"llava:7b","name":"LLaVA 7B","runtime":"ollama","capabilities":["vision"],"min_ram_gb":8,"min_vram_gb":0,"quality_rank":1,"license":"Llama 2 Community License","install":"ollama pull llava"},
+    {"id":"piper-en","name":"Piper TTS","runtime":"piper","capabilities":["tts"],"min_ram_gb":1,"min_vram_gb":0,"quality_rank":1,"license":"MIT","install":"download voice model and verify SHA256"},
+    {"id":"sdxl","name":"Stable Diffusion XL","runtime":"comfyui","capabilities":["image"],"min_ram_gb":8,"min_vram_gb":8,"quality_rank":2,"license":"Stability AI Community License","install":"configure ComfyUI checkpoint with SHA256"},
+    {"id":"video","name":"Local video model adapter","runtime":"comfyui","capabilities":["video"],"min_ram_gb":32,"min_vram_gb":16,"quality_rank":1,"license":"verify upstream license before install","install":"configure a compatible local workflow"}
+  ]
+}
