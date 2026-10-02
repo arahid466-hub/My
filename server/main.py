@@ -45,6 +45,10 @@ async def local_chat(req: ChatReq):
 
 @app.get('/')
 def index(): return FileResponse(Path(__file__).parents[1] / 'static' / 'index.html')
+@app.get('/frontend/index.html')
+def frontend_index():
+    return FileResponse(Path(__file__).parents[1] / 'frontend' / 'index.html')
+
 @app.get('/api/health')
 def health():
     tools={x: shutil.which(x) is not None for x in ['ffmpeg','ollama','piper']}
